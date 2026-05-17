@@ -1,4 +1,4 @@
-aiogram==3.13.0
-motor==3.6.0
-pymongo==4.9.1
-pydantic==2.9.2
+aiogram
+motor
+pymongo
+pydantic
