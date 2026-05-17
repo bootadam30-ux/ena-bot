@@ -392,11 +392,11 @@ async def main():
     
     # ডার্ক হিমু স্পেশাল সিএমডি ব্যানার
     banner = """
-  ____             _       _   _ _                  
- |  _ \  __ _ _ __| | __  | | | (_)_ __ ___  _   _ 
- | | | |/ _` | '__| |/ /  | |_| | | '_ ` _ \| | | |
- | |_| | (_| | |  |   <   |  _  | | | | | | | |_| |
- |____/ \__,_|_|  |_|\\_\\  |_| |_|_|_| |_| |_|\\__,_|
+ ____             _       _   _ _                  
+|  _ \  __ _ _ __| | __  | | | (_)_ __ ___  _   _ 
+| | | |/ _` | '__| |/ /  | |_| | | '_ ` _ \| | | |
+| |_| | (_| | |  |   <   |  _  | | | | | | | |_| |
+|____/ \__,_|_|  |_|\\_\\  |_| |_|_|_| |_| |_|\\__,_|
                                                    
  ──────────────────────────────────────────────────────────
  [🌙] SYSTEM   : OPERATIONAL
@@ -408,6 +408,16 @@ async def main():
     
     # আপনার ব্যাকগ্রাউন্ড টাস্ক এবং পোলিং শুরু
     asyncio.create_task(check_vip_expiry()) # ব্যাকগ্রাউন্ড চেক শুরু
+    
+    # রেন্ডারের জ্যাম কাটানোর জন্য ব্যাকগ্রাউন্ড ওয়েব সার্ভার
+    from aiohttp import web
+    app = web.Application()
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 10000)
+    await site.start()
+    
+    # টেলিগ্রাম বটের মেইন পোলিং শুরু
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
@@ -415,6 +425,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
         print("\n[🌙] Bot stopped by Dark Himu.")
-
-if __name__ == "__main__":
-    asyncio.run(main())
