@@ -406,18 +406,29 @@ async def main():
     """
     print(banner)
     
-    # আপনার ব্যাকগ্রাউন্ড টাস্ক এবং পোলিং শুরু
-    asyncio.create_task(check_vip_expiry()) # ব্যাকগ্রাউন্ড চেক শুরু
+    # আপনার ব্যাকগ্রাউন্ড টাস্ক শুরু
+    asyncio.create_task(check_vip_expiry())
     
-    # রেন্ডারের জ্যাম কাটানোর জন্য ব্যাকগ্রাউন্ড ওয়েব সার্ভার
-    from aiohttp import web
-    app = web.Application()
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 10000)
-    await site.start()
+    # রেন্ডারকে জাগিয়ে রাখার জন্য সবচেয়ে সেফ এবং লাইটওয়েট ব্যাকগ্রাউন্ড সার্ভার
+    import threading
+    from http.server import HTTPServer, BaseHTTPRequestHandler
     
-    # টেলিগ্রাম বটের মেইন পোলিং শুরু
+    class SimpleHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"Bot is Live!")
+        def log_message(self, format, *args):
+            return  # লগে ফালতু ট্রাফিক মেসেজ অফ রাখার জন্য
+
+    def run_server():
+        server = HTTPServer(('0.0.0.0', 10000), SimpleHandler)
+        server.serve_forever()
+        
+    # মেইন বটের লুপ থেকে আলাদা থ্রেডে সার্ভারটি রান করা হলো
+    threading.Thread(target=run_server, daemon=True).start()
+    
+    # টেলিগ্রাম বটের মেইন পোলিং শুরু (এখন এটি ফুল ফ্রি স্পিডে রান হবে)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
